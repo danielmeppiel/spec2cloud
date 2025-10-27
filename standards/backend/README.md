@@ -1,1 +1,0 @@
-# spec2win-guidelines-backend

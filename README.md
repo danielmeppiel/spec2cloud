@@ -7,13 +7,25 @@ https://github.com/user-attachments/assets/f0529e70-f437-4a14-93bc-4ab5a0450540
 
 ## 🎯 Overview
 
-This repository provides a preconfigured development environment and agent-driven workflow that takes you from product concept to deployed application through a structured, step-by-step process.
+This repository provides a preconfigured development environment and agent-driven workflow that works in two directions:
+
+- **Greenfield (Build New)**: Transform product ideas into deployed applications through structured specification-driven development
+- **Brownfield (Document Existing)**: Reverse engineer existing codebases into comprehensive product and technical documentation
+
+Both workflows use specialized GitHub Copilot agents working together to maintain consistency, traceability, and best practices.
 
 ## 🚀 Quick Start
 
+### Greenfield (New Project)
 1. **Open in Dev Container** - Everything is preconfigured in `.devcontainer/`
 2. **Describe your app idea** - The more specific, the better
 3. **Follow the workflow** - Use the prompts to guide specialized agents through each phase
+
+### Brownfield (Existing Codebase)
+1. **Open existing codebase** in Dev Container
+2. **Run `/plan-brown`** - Reverse engineer technical tasks from code
+3. **Run `/frd-brown`** - Synthesize feature requirements from tasks
+4. **Run `/prd-brown`** - Create product vision from features
 
 ## 🏗️ Architecture
 
@@ -68,7 +80,9 @@ Four specialized agents in `.github/chatmodes/`:
 - **Purpose**: Deploys applications to Azure with IaC and CI/CD pipelines
 - **Instructions**: Analyzes codebase, generates Bicep templates, creates GitHub Actions, uses Azure Dev CLI
 
-## 📋 Workflow
+## 📋 Workflows
+
+### Greenfield Workflow (Forward: Idea → Code)
 
 ```mermaid
 graph TB
@@ -106,7 +120,31 @@ graph TB
     style Choice fill:#fff9c4
 ```
 
-### Workflow Steps
+### Brownfield Workflow (Reverse: Code → Documentation)
+
+```mermaid
+graph TB
+    StartBrown[("📦 Existing Codebase<br/>Undocumented or<br/>poorly documented")]
+    
+    StartBrown --> PlanBrown["<b>/plan-brown</b><br/>💻 Dev Agent analyzes code<br/>& documents technical tasks"]
+    
+    PlanBrown --> FRDBrown["<b>/frd-brown</b><br/>📋 PM Agent synthesizes<br/>Feature Requirements from tasks"]
+    
+    FRDBrown --> PRDBrown["<b>/prd-brown</b><br/>📝 PM Agent creates<br/>Product Vision from features"]
+    
+    PRDBrown --> DocDone[("✅ Comprehensive Documentation<br/>PRD + FRDs + Tasks<br/>with full traceability")]
+    
+    DocDone -.->|Optional| Enhance["<b>Continue with greenfield</b><br/>🔄 Use /frd, /plan to add<br/>new features or improvements"]
+    
+    style StartBrown fill:#ffe0b2
+    style PlanBrown fill:#e8f5e9
+    style FRDBrown fill:#fff4e6
+    style PRDBrown fill:#fff4e6
+    style DocDone fill:#e1f5ff
+    style Enhance fill:#f3e5f5
+```
+
+### Greenfield Workflow Steps (Forward)
 
 1. **`/prd`** - Product Requirements Document
    - PM Agent engages in conversation to understand the product vision
@@ -138,6 +176,49 @@ graph TB
    - Generates Bicep IaC templates
    - Creates GitHub Actions workflows for CI/CD
    - Deploys to Azure using Azure Dev CLI and MCP tools
+
+### Brownfield Workflow Steps (Reverse)
+
+1. **`/plan-brown`** - Reverse Engineer Technical Tasks
+   - Dev Agent analyzes existing codebase (any language/framework)
+   - Documents implementation as discrete technical tasks
+   - Creates files in `specs/tasks/` with evidence-based specifications
+   - **Critical Rules**:
+     - ⚠️ **NEVER modifies code** - Read-only analysis
+     - ⚠️ **Documents ONLY what exists** - No fabrication
+     - ⚠️ **Honest about gaps** - Notes missing tests, incomplete features
+     - Links each task to actual code files and implementations
+
+2. **`/frd-brown`** - Synthesize Feature Requirements
+   - PM Agent reads all tasks from `specs/tasks/`
+   - Groups related tasks into logical product features
+   - Creates files in `specs/features/` focused on WHAT, not HOW
+   - **Critical Rules**:
+     - ⚠️ **Product perspective** - User capabilities, not technical details
+     - ⚠️ **Evidence-based** - User stories from actual functionality
+     - ⚠️ **Task traceability** - Links features back to implementing tasks
+     - ⚠️ **Honest about status** - Notes complete/partial/unclear features
+
+3. **`/prd-brown`** - Create Product Vision
+   - PM Agent reads all FRDs from `specs/features/`
+   - Synthesizes overarching product purpose and strategy
+   - Creates `specs/prd.md` with goals, scope, requirements
+   - **Critical Rules**:
+     - ⚠️ **Strategic synthesis** - Product vision from feature collection
+     - ⚠️ **Honest about clarity** - Notes when vision is unclear/inferred
+     - ⚠️ **Feature traceability** - Maps requirements to implementing FRDs
+     - ⚠️ **Documents assumptions** - Explicit about what requires validation
+     - Provides product status assessment and recommendations
+
+### Why Use Brownfield Workflow?
+
+- **Onboard new team members** - Comprehensive documentation of existing systems
+- **Legacy system understanding** - Reverse engineer undocumented codebases
+- **Pre-acquisition due diligence** - Document technical assets before purchase
+- **Migration planning** - Understand current state before modernization
+- **Audit and compliance** - Document what the system actually does
+- **Knowledge preservation** - Capture tribal knowledge before team changes
+- **Bridge to modernization** - After documenting, use greenfield workflow to add features
 
 ## 📁 Documentation Structure
 
@@ -243,6 +324,8 @@ git subtree add --prefix standards/frontend https://github.com/EmeaAppGbb/spec2c
 
 ## 🎓 Example Usage
 
+### Greenfield Example (New Project)
+
 ```bash
 # Start with your product idea
 "I want to create a smart AI agent for elderly care that tracks vitals and alerts caregivers"
@@ -269,14 +352,63 @@ git subtree add --prefix standards/frontend https://github.com/EmeaAppGbb/spec2c
 /deploy
 ```
 
+### Brownfield Example (Existing Project)
+
+```bash
+# You have an existing codebase with minimal or outdated documentation
+"I inherited a marketing campaign management app built in Python/React"
+
+# Step 1: Reverse engineer technical tasks from code
+/plan-brown
+# Agent analyzes codebase (Python FastAPI backend, React frontend)
+# Creates specs/tasks/ with honest documentation of what exists
+# Notes: "Task 008: Email service - stub only, not fully implemented"
+
+# Step 2: Synthesize feature requirements from tasks
+/frd-brown
+# Agent groups tasks into product features
+# Creates specs/features/campaign-management.md, user-authentication.md, etc.
+# Notes: "Email notifications feature - partially implemented"
+
+# Step 3: Create product vision from features
+/prd-brown
+# Agent synthesizes overall product purpose
+# Creates specs/prd.md with goals, scope, user stories
+# Includes "Product Status Assessment" with gaps and recommendations
+
+# Result: Complete documentation traceability
+# PRD → FRDs → Tasks → Code (with file paths)
+
+# Optional: Now enhance using greenfield workflow
+/frd  # Add new features to existing FRDs
+/plan # Create tasks for new features
+/implement # Build the enhancements
+```
+
 ## 🔑 Key Benefits
 
+### Greenfield Benefits
 - **Zero Setup** - Dev container has everything preconfigured
 - **Structured Process** - Clear workflow from idea to production
 - **AI-Powered** - Specialized agents handle different aspects
 - **Best Practices** - Built-in architectural guidance via `AGENTS.md`
 - **Flexible Implementation** - Choose local development or delegation
 - **Azure-Ready** - Automated IaC and CI/CD generation
+
+### Brownfield Benefits
+- **Comprehensive Documentation** - Reverse engineer complete product docs from code
+- **Full Traceability** - Every product requirement links to code implementation
+- **Honest Assessment** - Identifies gaps, missing tests, incomplete features
+- **Technology Agnostic** - Works with any language/framework (.NET, Python, Node.js, Java, etc.)
+- **Knowledge Capture** - Preserves understanding before team changes
+- **Bridge to Modernization** - Document current state, then enhance with greenfield workflow
+- **Onboarding Accelerator** - New developers understand system architecture quickly
+
+### Universal Benefits
+- **Living Documentation** - Specs evolve with the codebase
+- **Bidirectional Workflow** - Start with idea OR start with code
+- **Specialized Agents** - PM, Dev, Dev Lead, and Azure agents with distinct roles
+- **Evidence-Based** - Brownfield never fabricates, greenfield builds intentionally
 
 ## 📖 Learn More
 
